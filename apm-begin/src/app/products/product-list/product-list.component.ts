@@ -1,11 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 
 import { NgIf, NgFor, NgClass } from '@angular/common';
 import { Product } from '../product';
 import { ProductDetailComponent } from '../product-detail/product-detail.component';
 import { ProductService } from '../product.service';
-import { Subscription, tap } from 'rxjs';
+import { catchError, empty, Subscription, tap, throwError } from 'rxjs';
 import { subscriptionLogsToBeFn } from 'rxjs/internal/testing/TestScheduler';
+
 
 @Component({
     selector: 'pm-product-list',
@@ -13,7 +14,7 @@ import { subscriptionLogsToBeFn } from 'rxjs/internal/testing/TestScheduler';
     standalone: true,
   imports: [NgIf, NgFor, NgClass, ProductDetailComponent]
 })
-export class ProductListComponent {
+export class ProductListComponent implements OnInit, OnDestroy {
   
 constructor(private productService : ProductService){}
 
@@ -30,13 +31,24 @@ constructor(private productService : ProductService){}
   ngOnInit() : void{
     this.sub = this.productService.getProducts()
     .pipe(
-      tap(() => console.log('product list pipe line.'))
-    ).subscribe();
+      tap(() => console.log('product list pipe line.')) ,
+    catchError(err => {
+       this.errorMessage = err;
+       //return empty;
+       throw(this.errorMessage);
+      }) 
+    ).subscribe({
+      next :  products => {
+      this.products = products;
+      console.log(this.products);
+      }//,
+      //error : err => this.errorMessage = err
+    });
   }
   ngOnDestroy() : void{
     this.sub.unsubscribe();
   }
-
+  
   onSelected(productId: number): void {
     this.selectedProductId = productId;
   }

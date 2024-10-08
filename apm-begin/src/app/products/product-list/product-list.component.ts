@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 
-import { NgIf, NgFor, NgClass } from '@angular/common';
+import { NgIf, NgFor, NgClass, AsyncPipe } from '@angular/common';
 import { Product } from '../product';
 import { ProductDetailComponent } from '../product-detail/product-detail.component';
 import { ProductService } from '../product.service';
@@ -12,24 +12,36 @@ import { subscriptionLogsToBeFn } from 'rxjs/internal/testing/TestScheduler';
     selector: 'pm-product-list',
     templateUrl: './product-list.component.html',
     standalone: true,
-  imports: [NgIf, NgFor, NgClass, ProductDetailComponent]
+  imports: [AsyncPipe, NgIf, NgFor, NgClass, ProductDetailComponent]
 })
-export class ProductListComponent implements OnInit, OnDestroy {
-  
+export class ProductListComponent  {
+  //export class ProductListComponent implements OnInit, OnDestroy {
+
 constructor(private productService : ProductService){}
 
   pageTitle = 'Products';
   errorMessage = '';
-  sub!: Subscription;
+  //sub!: Subscription;
 
   // Products
-  products: Product[] = [];
+  //products: Product[] = [];
+
+readonly products$ = this.productService.products$ //getProducts()
+.pipe(
+  tap(() => console.log('product list pipe line.')) ,
+catchError(err => {
+   this.errorMessage = err;
+   //return empty;
+   throw(this.errorMessage);
+  }) 
+);
 
   // Selected product id to highlight the entry
-  selectedProductId: number = 0;
+  //selectedProductId: number = 0;
+  readonly selectedProductId$ = this.productService.productSelected$;
 
-  ngOnInit() : void{
-    this.sub = this.productService.getProducts()
+  /*ngOnInit() : void{
+    this.sub = this.productService.products$ //getProducts()
     .pipe(
       tap(() => console.log('product list pipe line.')) ,
     catchError(err => {
@@ -47,9 +59,10 @@ constructor(private productService : ProductService){}
   }
   ngOnDestroy() : void{
     this.sub.unsubscribe();
-  }
+  }*/
   
   onSelected(productId: number): void {
-    this.selectedProductId = productId;
+    //this.selectedProductId = productId;
+    this.productService.productSelected(productId);
   }
 }

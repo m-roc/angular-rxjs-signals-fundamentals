@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, catchError, empty, filter, Observable, of, shareReplay, switchMap, tap, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, combineLatest, empty, filter, Observable, of, shareReplay, switchMap, tap, throwError } from 'rxjs';
 import { Product } from './product';
 import { ProductData } from './product-data';
 import { HttpErrorService } from '../utilities/http-error.service';
@@ -58,7 +58,7 @@ readonly products$ = this.http.get<Product[]> (this.productsUrl)
       this.productSelectedSubject.next(selectedProductId);
     }
 
-   product$ = this.productSelected$
+   product1$ = this.productSelected$
    .pipe(
     filter(Boolean),
     switchMap(id => {
@@ -73,6 +73,19 @@ readonly products$ = this.http.get<Product[]> (this.productsUrl)
     })
    );
    
+   product$ = combineLatest([
+    this.productSelected$, 
+    this.products$
+   ]).pipe(
+    tap(x => x),
+    map(([selectedProductId, products]) =>
+      products.find(product => product.id === selectedProductId)
+   ),
+   filter(Boolean),
+   switchMap(product => this.getProductWithReviews(product)),
+        tap(x => console.log(x)),
+        catchError(err => this.handleError(err))
+  );
     
 private getProductWithReviews(product: Product): Observable<Product>{
   if(product.hasReviews){

@@ -26,15 +26,18 @@ constructor(private productService : ProductService){}
   // Products
   //products: Product[] = [];
 
-readonly products$ = this.productService.products$ //getProducts()
-.pipe(
-  tap(() => console.log('product list pipe line.')) ,
-catchError(err => {
-   this.errorMessage = err;
-   //return empty;
-   throw(this.errorMessage);
-  }) 
-);
+
+products = this.productService.products;
+
+//readonly products$ = this.productService.products$ //getProducts()
+//.pipe(
+//  tap(() => console.log('product list pipe line.')) ,
+//catchError(err => {
+   //this.errorMessage = err;
+   ////return empty;
+   //throw(this.errorMessage);
+  //}) 
+//);
 
   // Selected product id to highlight the entry
   //selectedProductId: number = 0;

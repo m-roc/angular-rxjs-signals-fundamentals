@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject, catchError, combineLatest, empty, filter, Observable, of, shareReplay, switchMap, tap, throwError } from 'rxjs';
 import { Product } from './product';
 import { ProductData } from './product-data';
@@ -8,6 +8,7 @@ import { observableToBeFn } from 'rxjs/internal/testing/TestScheduler';
 import { map } from 'rxjs';
 import { ReviewService } from '../reviews/review.service';
 import { Review } from '../reviews/review';
+import {toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root'
@@ -23,12 +24,15 @@ export class ProductService {
 private productSelectedSubject = new BehaviorSubject<number | undefined>(undefined);
 readonly productSelected$ = this.productSelectedSubject.asObservable();
 
-readonly products$ = this.http.get<Product[]> (this.productsUrl)
+//readonly products$ = this.http.get<Product[]> (this.productsUrl)
+private products$ = this.http.get<Product[]> (this.productsUrl)
 .pipe(
   tap(() => console.log('http.get pip line.')),
   shareReplay(1),
  catchError(err => this.handleError(err))
 );
+
+products = toSignal(this.products$, {initialValue: [] as Product[]} );
 
     /*getProducts() : Observable<Product[]>{
       return this.http.get<Product[]> (this.productsUrl)

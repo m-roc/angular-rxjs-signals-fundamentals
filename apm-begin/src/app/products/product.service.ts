@@ -15,7 +15,7 @@ import { computeMsgId } from '@angular/compiler';
   providedIn: 'root'
 })
 export class ProductService {
-    private productsUrl = 'api/productss';
+    private productsUrl = 'api/products';
 
     constructor(private http: HttpClient,
       private errorService: HttpErrorService,
@@ -24,6 +24,7 @@ export class ProductService {
 
 private productSelectedSubject = new BehaviorSubject<number | undefined>(undefined);
 readonly productSelected$ = this.productSelectedSubject.asObservable();
+selectedProductId = signal<number | undefined>(undefined);
 
 //readonly products$ = this.http.get<Product[]> (this.productsUrl)
 private productsResult$ = this.http.get<Product[]> (this.productsUrl)
@@ -79,6 +80,7 @@ try {
 
     productSelected (selectedProductId: number)  : void{
       this.productSelectedSubject.next(selectedProductId);
+      this.selectedProductId.set(selectedProductId);
     }
 //1$
    product$ = this.productSelected$

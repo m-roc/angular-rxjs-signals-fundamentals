@@ -42,7 +42,8 @@ errorMessage = this.productService.productsError;
 
   // Selected product id to highlight the entry
   //selectedProductId: number = 0;
-  readonly selectedProductId$ = this.productService.productSelected$;
+  //readonly selectedProductId$ = this.productService.productSelected$;
+   selectedProductId = this.productService.selectedProductId;
 
   /*ngOnInit() : void{
     this.sub = this.productService.products$ //getProducts()

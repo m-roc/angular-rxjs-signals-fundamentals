@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable, signal } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { BehaviorSubject, catchError, combineLatest, empty, filter, Observable, of, shareReplay, switchMap, tap, throwError } from 'rxjs';
 import { Product } from './product';
 import { ProductData } from './product-data';
@@ -9,12 +9,13 @@ import { map } from 'rxjs';
 import { ReviewService } from '../reviews/review.service';
 import { Review } from '../reviews/review';
 import {toSignal } from '@angular/core/rxjs-interop';
+import { computeMsgId } from '@angular/compiler';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
-    private productsUrl = 'api/products';
+    private productsUrl = 'api/productss';
 
     constructor(private http: HttpClient,
       private errorService: HttpErrorService,
@@ -32,7 +33,17 @@ private products$ = this.http.get<Product[]> (this.productsUrl)
  catchError(err => this.handleError(err))
 );
 
-products = toSignal(this.products$, {initialValue: [] as Product[]} );
+
+
+//products = toSignal(this.products$, {initialValue: [] as Product[]} );
+products = computed(() => {
+try {
+  return toSignal(this.products$, {initialValue: [] as Product[]})();
+} catch (error) {
+  return [] as Product[];
+}
+});
+
 
     /*getProducts() : Observable<Product[]>{
       return this.http.get<Product[]> (this.productsUrl)
@@ -61,8 +72,8 @@ products = toSignal(this.products$, {initialValue: [] as Product[]} );
     productSelected (selectedProductId: number)  : void{
       this.productSelectedSubject.next(selectedProductId);
     }
-
-   product1$ = this.productSelected$
+//1$
+   product$ = this.productSelected$
    .pipe(
     filter(Boolean),
     switchMap(id => {
@@ -77,7 +88,7 @@ products = toSignal(this.products$, {initialValue: [] as Product[]} );
     })
    );
    
-   product$ = combineLatest([
+   /*product$ = combineLatest([
     this.productSelected$, 
     this.products$
    ]).pipe(
@@ -89,7 +100,7 @@ products = toSignal(this.products$, {initialValue: [] as Product[]} );
    switchMap(product => this.getProductWithReviews(product)),
         tap(x => console.log(x)),
         catchError(err => this.handleError(err))
-  );
+  );*/
     
 private getProductWithReviews(product: Product): Observable<Product>{
   if(product.hasReviews){

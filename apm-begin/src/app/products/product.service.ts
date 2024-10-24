@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { computed, Injectable, signal } from '@angular/core';
 import { BehaviorSubject, catchError, combineLatest, empty, filter, Observable, of, shareReplay, switchMap, tap, throwError } from 'rxjs';
-import { Product } from './product';
+import { Product, Result } from './product';
 import { ProductData } from './product-data';
 import { HttpErrorService } from '../utilities/http-error.service';
 import { observableToBeFn } from 'rxjs/internal/testing/TestScheduler';
@@ -26,23 +26,31 @@ private productSelectedSubject = new BehaviorSubject<number | undefined>(undefin
 readonly productSelected$ = this.productSelectedSubject.asObservable();
 
 //readonly products$ = this.http.get<Product[]> (this.productsUrl)
-private products$ = this.http.get<Product[]> (this.productsUrl)
+private productsResult$ = this.http.get<Product[]> (this.productsUrl)
 .pipe(
+  map(p => ({data: p, error: undefined} as Result<Product[]>)),
   tap(() => console.log('http.get pip line.')),
   shareReplay(1),
- catchError(err => this.handleError(err))
+  catchError(err => 
+    of({data: [], 
+      error: this.errorService.formatError(err) 
+    } as Result<Product[]>))
+ //catchError(err => this.handleError(err))
 );
 
+private productsResult = toSignal(this.productsResult$, 
+  {initialValue: ({data: [], error: undefined} as Result<Product[]>)} );
 
+products = computed(() => this.productsResult().data);
+productsError = computed(() => this.productsResult().error);
 
-//products = toSignal(this.products$, {initialValue: [] as Product[]} );
-products = computed(() => {
+/*products = computed(() => {
 try {
   return toSignal(this.products$, {initialValue: [] as Product[]})();
 } catch (error) {
   return [] as Product[];
 }
-});
+});*/
 
 
     /*getProducts() : Observable<Product[]>{

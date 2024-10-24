@@ -20,7 +20,7 @@ export class ProductListComponent  {
 constructor(private productService : ProductService){}
 
   pageTitle = 'Products';
-  errorMessage = '';
+  
   //sub!: Subscription;
 
   // Products
@@ -28,6 +28,7 @@ constructor(private productService : ProductService){}
 
 
 products = this.productService.products;
+errorMessage = this.productService.productsError;
 
 //readonly products$ = this.productService.products$ //getProducts()
 //.pipe(

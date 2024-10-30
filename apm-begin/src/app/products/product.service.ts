@@ -8,7 +8,7 @@ import { observableToBeFn } from 'rxjs/internal/testing/TestScheduler';
 import { map } from 'rxjs';
 import { ReviewService } from '../reviews/review.service';
 import { Review } from '../reviews/review';
-import {toSignal } from '@angular/core/rxjs-interop';
+import {toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { computeMsgId } from '@angular/compiler';
 
 @Injectable({
@@ -22,8 +22,8 @@ export class ProductService {
       private reviewService: ReviewService
     ) {}
 
-private productSelectedSubject = new BehaviorSubject<number | undefined>(undefined);
-readonly productSelected$ = this.productSelectedSubject.asObservable();
+//private productSelectedSubject = new BehaviorSubject<number | undefined>(undefined);
+//readonly productSelected$ = this.productSelectedSubject.asObservable();
 selectedProductId = signal<number | undefined>(undefined);
 
 //readonly products$ = this.http.get<Product[]> (this.productsUrl)
@@ -79,11 +79,12 @@ try {
     }*/
 
     productSelected (selectedProductId: number)  : void{
-      this.productSelectedSubject.next(selectedProductId);
+      //this.productSelectedSubject.next(selectedProductId);
       this.selectedProductId.set(selectedProductId);
     }
-//1$
-   product$ = this.productSelected$
+
+    //readonly  product$ = this.productSelected$    //1$
+readonly  product$ = toObservable(this.selectedProductId)
    .pipe(
     filter(Boolean),
     switchMap(id => {
